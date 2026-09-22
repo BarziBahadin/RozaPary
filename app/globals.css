@@ -2026,3 +2026,51 @@ h1 em {
     padding: 0 16px !important;
   }
 }
+
+/* The sealed invitation is a complete opening scene, at every viewport size. */
+.invitation-hero.envelope-only {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  place-items: center;
+  min-height: 100svh;
+  height: auto;
+  max-height: none;
+  padding: clamp(70px, 14svh, 110px) 24px clamp(36px, 8svh, 70px);
+  background: radial-gradient(
+    ellipse at 50% 48%,
+    #682630 0%,
+    #4a111c 56%,
+    #370a13 100%
+  );
+}
+.envelope-only .envelope-stage {
+  width: min(100%, 620px);
+  padding: 0;
+}
+.envelope-only .envelope {
+  width: min(430px, 74vw);
+  max-width: 85%;
+}
+.envelope-only .envelope-dedication {
+  margin: 0 0 48px;
+  font-size: clamp(17px, 3vw, 21px);
+}
+.envelope-only .stage-orbit {
+  width: min(580px, 100%);
+  height: auto;
+  aspect-ratio: 1;
+  max-width: none;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -47%);
+}
+.envelope-only .open-invitation {
+  margin-top: 62px;
+}
+.envelope-only .stage-sparkle {
+  display: block;
+}
+.envelope-only .tap-hint {
+  text-align: center;
+  line-height: 1.8;
+}

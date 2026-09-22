@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import {
   ArrowUpRight,
-  ChevronDown,
   VolumeX,
   Volume2,
   Flower2,
@@ -110,56 +109,67 @@ export function InvitationExperience({ event }: { event: Invitation }) {
   }
   return (
     <main className={`invitation-shell phase-${phase}`}>
-      <a className="skip-link" href="#celebration">
-        Skip to event details
-      </a>
-      <header className="site-header">
-        <Link href="/" className="wordmark" aria-label="Roza home">
-          roza<span>THE ART OF INVITING</span>
-        </Link>
-        <nav aria-label="Invitation navigation">
-          <a
-            href="#invitation"
-            onClick={() => {
-              if (phase === 'open')
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-          >
-            The invitation
+      {phase === 'open' && (
+        <>
+          <a className="skip-link" href="#celebration">
+            Skip to event details
           </a>
-          <a href="#celebration">The celebration</a>
-          <a
-            href="#rsvp"
-            onClick={(e) => {
-              if (phase !== 'open') {
-                e.preventDefault();
-                openInvitation('rsvp');
+          <header className="site-header">
+            <Link href="/" className="wordmark" aria-label="Roza home">
+              roza<span>THE ART OF INVITING</span>
+            </Link>
+            <nav aria-label="Invitation navigation">
+              <a
+                href="#invitation"
+                onClick={() => {
+                  if (phase === 'open')
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              >
+                The invitation
+              </a>
+              <a href="#celebration">The celebration</a>
+              <a
+                href="#rsvp"
+                onClick={(e) => {
+                  if (phase !== 'open') {
+                    e.preventDefault();
+                    openInvitation('rsvp');
+                  }
+                }}
+              >
+                Kindly RSVP <ArrowUpRight size={13} />
+              </a>
+            </nav>
+            <Button
+              className="sound-control"
+              variant="ghost"
+              onClick={audio.toggle}
+              aria-label={
+                audio.playing
+                  ? 'Pause background music'
+                  : 'Play background music'
               }
-            }}
-          >
-            Kindly RSVP <ArrowUpRight size={13} />
-          </a>
-        </nav>
-        <Button
-          className="sound-control"
-          variant="ghost"
-          onClick={audio.toggle}
-          aria-label={
-            audio.playing ? 'Pause background music' : 'Play background music'
-          }
-          aria-pressed={audio.playing}
-        >
-          {audio.playing ? <Volume2 size={17} /> : <VolumeX size={17} />}
-          <span>{audio.playing ? 'Sound on' : 'Sound off'}</span>
-        </Button>
-      </header>
-      {audio.error && (
-        <p className="audio-notice" aria-live="polite">
-          {audio.error}
-        </p>
+              aria-pressed={audio.playing}
+            >
+              {audio.playing ? <Volume2 size={17} /> : <VolumeX size={17} />}
+              <span>{audio.playing ? 'Sound on' : 'Sound off'}</span>
+            </Button>
+          </header>
+          {audio.error && (
+            <p className="audio-notice" aria-live="polite">
+              {audio.error}
+            </p>
+          )}
+        </>
       )}
       {phase !== 'open' ? (
-        <section className="invitation-hero" id="invitation">
+        <section
+          className="invitation-hero envelope-only"
+          id="invitation"
+          aria-label={`${event.names} invitation`}
+        >
+          <h1 className="sr-only">An invitation from {event.names}</h1>
           <div className="ambient-dust" aria-hidden="true">
             {Array.from({ length: 24 }, (_, i) => (
               <i
@@ -171,26 +181,6 @@ export function InvitationExperience({ event }: { event: Invitation }) {
                 }}
               />
             ))}
-          </div>
-          <div className="hero-copy">
-            <p className="eyebrow">
-              <span /> SOMETHING BEAUTIFUL AWAITS
-            </p>
-            <h1>
-              A moment.
-              <br />A memory.
-              <br />
-              <em>Our forever.</em>
-            </h1>
-            <p className="hero-description">
-              Some days stay with us for a lifetime.
-              <br />
-              We would love for you to be part of ours.
-            </p>
-            <div className="couple-signature">{event.names}</div>
-            <p className="hero-date">
-              {prettyDate(event.date)} <span>·</span> {event.location}
-            </p>
           </div>
           <div className="envelope-stage">
             <div className="stage-orbit" />
@@ -244,13 +234,6 @@ export function InvitationExperience({ event }: { event: Invitation }) {
             <Butterfly className="butterfly-one" />
             <Butterfly className="butterfly-two" />
           </div>
-          <div className="hero-bottom">
-            <span>MADE WITH LOVE. MEANT TO BE FELT.</span>
-            <a href="#celebration">
-              A beautiful day awaits <ChevronDown size={14} />
-            </a>
-            <span>EST. FOREVER</span>
-          </div>
         </section>
       ) : (
         <section
@@ -296,67 +279,70 @@ export function InvitationExperience({ event }: { event: Invitation }) {
           <Butterfly className="butterfly-two" />
         </section>
       )}
-      <section className="celebration-section" id="celebration">
-        <p className="eyebrow">THE BEGINNING OF A BEAUTIFUL MEMORY</p>
-        <h2>
-          One beautiful day.
-          <br />
-          <em>A lifetime of memories.</em>
-        </h2>
-        <p>{event.message}</p>
-        <div className="event-details">
-          <div>
-            <CalendarDays size={21} strokeWidth={1} />
-            <span className="detail-label">THE DAY</span>
-            <h3>
-              {prettyDate(event.date, {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-              })}
-            </h3>
-            <p>{prettyDate(event.date, { weekday: 'long' })}</p>
-            <a href={`/api/calendar/${event.slug}`} className="text-link">
-              Add to calendar <ArrowUpRight size={13} />
-            </a>
-          </div>
-          <div>
-            <MapPin size={21} strokeWidth={1} />
-            <span className="detail-label">THE PLACE</span>
-            <h3>{event.venue}</h3>
-            <p>{event.location}</p>
-            <a
-              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue + ', ' + event.address)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-link"
-            >
-              Find your way <ArrowUpRight size={13} />
-            </a>
-          </div>
-          <div>
-            <Clock3 size={21} strokeWidth={1} />
-            <span className="detail-label">THE TIME</span>
-            <h3>
-              {new Intl.DateTimeFormat('en-US', {
-                hour: 'numeric',
-                minute: '2-digit',
-                timeZone: 'UTC',
-              }).format(new Date(`2000-01-01T${event.time}:00Z`))}
-            </h3>
-            <p>Local time · {event.timezone.replaceAll('_', ' ')}</p>
-            <span className="detail-note">Please arrive 15 minutes early</span>
-          </div>
-        </div>
-        <div className="dress-code">
-          <span>DRESS FOR THE OCCASION</span>
-          <p>
-            {event.dressCode || 'Wear something that makes you feel wonderful.'}
-          </p>
-        </div>
-      </section>
-      {phase === 'open' ? (
+      {phase === 'open' && (
         <>
+          <section className="celebration-section" id="celebration">
+            <p className="eyebrow">THE BEGINNING OF A BEAUTIFUL MEMORY</p>
+            <h2>
+              One beautiful day.
+              <br />
+              <em>A lifetime of memories.</em>
+            </h2>
+            <p>{event.message}</p>
+            <div className="event-details">
+              <div>
+                <CalendarDays size={21} strokeWidth={1} />
+                <span className="detail-label">THE DAY</span>
+                <h3>
+                  {prettyDate(event.date, {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                </h3>
+                <p>{prettyDate(event.date, { weekday: 'long' })}</p>
+                <a href={`/api/calendar/${event.slug}`} className="text-link">
+                  Add to calendar <ArrowUpRight size={13} />
+                </a>
+              </div>
+              <div>
+                <MapPin size={21} strokeWidth={1} />
+                <span className="detail-label">THE PLACE</span>
+                <h3>{event.venue}</h3>
+                <p>{event.location}</p>
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue + ', ' + event.address)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-link"
+                >
+                  Find your way <ArrowUpRight size={13} />
+                </a>
+              </div>
+              <div>
+                <Clock3 size={21} strokeWidth={1} />
+                <span className="detail-label">THE TIME</span>
+                <h3>
+                  {new Intl.DateTimeFormat('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    timeZone: 'UTC',
+                  }).format(new Date(`2000-01-01T${event.time}:00Z`))}
+                </h3>
+                <p>Local time · {event.timezone.replaceAll('_', ' ')}</p>
+                <span className="detail-note">
+                  Please arrive 15 minutes early
+                </span>
+              </div>
+            </div>
+            <div className="dress-code">
+              <span>DRESS FOR THE OCCASION</span>
+              <p>
+                {event.dressCode ||
+                  'Wear something that makes you feel wonderful.'}
+              </p>
+            </div>
+          </section>
           <section className="schedule-section">
             <div>
               <p className="eyebrow">LET THE DAY UNFOLD</p>
@@ -400,29 +386,17 @@ export function InvitationExperience({ event }: { event: Invitation }) {
               />
             )}
           </div>
+          <footer className="site-footer">
+            <Link href="/" className="wordmark">
+              roza
+            </Link>
+            <span>A little envelope. A lifetime of memories.</span>
+            <Link href="/admin">
+              Host your celebration <ArrowUpRight size={14} />
+            </Link>
+          </footer>
         </>
-      ) : (
-        <section className="sealed-reminder" id="rsvp">
-          <Flower2 size={27} strokeWidth={1} />
-          <h2>Your invitation is waiting.</h2>
-          <p>Open your envelope to discover the day and send your reply.</p>
-          <Button
-            className="primary-button"
-            onClick={() => openInvitation('rsvp')}
-          >
-            Unseal the invitation <ArrowUpRight size={15} />
-          </Button>
-        </section>
       )}
-      <footer className="site-footer">
-        <Link href="/" className="wordmark">
-          roza
-        </Link>
-        <span>A little envelope. A lifetime of memories.</span>
-        <Link href="/admin">
-          Host your celebration <ArrowUpRight size={14} />
-        </Link>
-      </footer>
     </main>
   );
 }
