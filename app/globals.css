@@ -2208,3 +2208,20 @@ h1 em {
     transform: translateY(0);
   }
 }
+
+.site-header .couple-wordmark {
+  min-width: 0;
+  max-width: 38%;
+  font-family: 'Great Vibes', cursive;
+  font-size: clamp(26px, 2.7vw, 38px);
+  line-height: 1.25;
+  color: #e6c795;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 720px) {
+  .site-header .couple-wordmark {
+    flex: 1;
+    max-width: none;
+    font-size: clamp(24px, 7vw, 34px);
+  }
+}

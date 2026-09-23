@@ -153,9 +153,9 @@ export function InvitationExperience({ event }: { event: Invitation }) {
             Skip to event details
           </a>
           <header className="site-header">
-            <Link href="/" className="wordmark" aria-label="Roza home">
-              roza<span>THE ART OF INVITING</span>
-            </Link>
+            <a href="#invitation" className="couple-wordmark">
+              {event.names}
+            </a>
             <nav aria-label="Invitation navigation">
               <a
                 href="#invitation"
