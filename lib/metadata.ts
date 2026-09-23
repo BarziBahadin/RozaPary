@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
-import { env } from 'cloudflare:workers';
+import 'server-only';
 import { demoEvent, prettyDate, type Invitation } from './event';
 export function invitationMetadata(event: Invitation, path: string): Metadata {
-  const origin = (env as unknown as { SITE_URL?: string }).SITE_URL;
+  const origin =
+    process.env.SITE_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined);
   const title = `${event.names} — You're invited | Roza`;
   const description = `${event.kind} · ${prettyDate(event.date)} · ${event.location}. A little envelope. A lifetime of memories.`;
   // The artwork depicts the original sample by name. Never attach it to another event.

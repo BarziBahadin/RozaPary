@@ -1,4 +1,4 @@
-import { database, getEvent } from '@/db';
+import { recordOpen, getEvent } from '@/db';
 import {
   body,
   checkOrigin,
@@ -23,13 +23,7 @@ export async function POST(request: Request) {
     )
       throw new HttpError('Invitation not found.', 404);
     const token = guest(request);
-    const db = await database();
-    await db
-      .prepare(
-        'INSERT OR IGNORE INTO opens (event_slug,guest_token,opened_at) VALUES (?,?,?)',
-      )
-      .bind(input.eventSlug, await hash(token), new Date().toISOString())
-      .run();
+    await recordOpen(input.eventSlug, await hash(token));
     return json({ success: true }, 200, {
       'Set-Cookie': cookieHeader(request, 'roza_guest', token, 365 * 86400),
     });

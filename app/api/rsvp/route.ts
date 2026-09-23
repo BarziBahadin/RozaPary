@@ -1,4 +1,4 @@
-import { database, getEvent } from '@/db';
+import { saveRsvp, getEvent } from '@/db';
 import { parseRsvp } from '@/lib/validation';
 import {
   body,
@@ -31,25 +31,7 @@ export async function POST(request: Request) {
       );
     const token = guest(request);
     const digest = await hash(token);
-    const now = new Date().toISOString();
-    const db = await database();
-    await db
-      .prepare(
-        'INSERT INTO responses (id,event_slug,guest_token,name,attendance,plus_ones,dietary,message,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?) ON CONFLICT(event_slug,guest_token) DO UPDATE SET name=excluded.name,attendance=excluded.attendance,plus_ones=excluded.plus_ones,dietary=excluded.dietary,message=excluded.message,updated_at=excluded.updated_at',
-      )
-      .bind(
-        crypto.randomUUID(),
-        input.eventSlug,
-        digest,
-        input.name,
-        input.attendance,
-        input.plusOnes,
-        input.dietary,
-        input.message,
-        now,
-        now,
-      )
-      .run();
+    await saveRsvp(input, digest);
     return json({ success: true, attendance: input.attendance }, 200, {
       'Set-Cookie': cookieHeader(request, 'roza_guest', token, 365 * 86400),
     });

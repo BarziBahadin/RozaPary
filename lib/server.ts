@@ -1,5 +1,5 @@
-import { env } from 'cloudflare:workers';
-import { database } from '@/db';
+import 'server-only';
+import { consumeRateLimit, DatabaseError } from '@/db';
 import { ValidationError } from '@/lib/validation';
 const encoder = new TextEncoder();
 export class HttpError extends Error {
@@ -79,23 +79,17 @@ export async function limit(
   category: string,
   maximum: number,
 ) {
-  const db = await database();
-  const now = Date.now();
-  const bucket = Math.floor(now / 60000);
-  // Cloudflare overwrites CF-Connecting-IP in production. Never trust X-Forwarded-For.
-  const ip = request.headers.get('cf-connecting-ip') ?? 'local';
+  const bucket = Math.floor(Date.now() / 60000);
+  // Trust Vercel’s overwritten IP header only when running on Vercel.
+  const ip =
+    process.env.VERCEL === '1'
+      ? (request.headers.get('x-vercel-forwarded-for') ??
+        request.headers.get('x-forwarded-for') ??
+        'unknown')
+      : 'local';
   const key = await hash(`${category}:${ip}:${bucket}`);
-  const row = await db
-    .prepare(
-      'INSERT INTO rate_limits (key, hits, expires_at) VALUES (?, 1, ?) ON CONFLICT(key) DO UPDATE SET hits = hits + 1 RETURNING hits',
-    )
-    .bind(key, now + 120000)
-    .first<{ hits: number }>();
-  await db
-    .prepare('DELETE FROM rate_limits WHERE expires_at < ?')
-    .bind(now)
-    .run();
-  if (!row || row.hits > maximum)
+  const hits = await consumeRateLimit(key);
+  if (hits > maximum)
     throw new HttpError(
       'Too many requests. Please try again in a minute.',
       429,
@@ -110,7 +104,7 @@ export function guest(request: Request) {
         .join('');
 }
 function adminSecret() {
-  const value = (env as unknown as { ADMIN_PASSWORD?: string }).ADMIN_PASSWORD;
+  const value = process.env.ADMIN_PASSWORD;
   if (!value || value.length < 16)
     throw new HttpError(
       'The host password has not been configured. Set ADMIN_PASSWORD to at least 16 characters.',
@@ -177,6 +171,31 @@ export async function handle(action: () => Promise<Response>) {
   try {
     return await action();
   } catch (error) {
+    if (error instanceof DatabaseError) {
+      if (error.code === 'NOT_CONFIGURED')
+        return json({ error: error.message }, 503);
+      if (error.code === '23505')
+        return json(
+          {
+            error:
+              'That invitation link is already in use. Please choose another.',
+          },
+          409,
+        );
+      if (error.code === 'P0001')
+        return json(
+          { error: 'The RSVP deadline has passed. Please contact your host.' },
+          410,
+        );
+      if (error.code === 'PGRST202' || error.code === '42P01')
+        return json(
+          {
+            error:
+              'The Supabase database needs setup. Run the SQL migration in supabase/migrations.',
+          },
+          503,
+        );
+    }
     if (error instanceof ValidationError)
       return json({ error: error.message }, 400);
     if (error instanceof HttpError)

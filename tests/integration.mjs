@@ -5,7 +5,8 @@ const origin = process.env.TEST_ORIGIN ?? 'http://localhost:3000';
 if (!['localhost', '127.0.0.1'].includes(new URL(origin).hostname))
   throw new Error('Integration tests are restricted to localhost.');
 const env = await readFile(new URL('../.env', import.meta.url), 'utf8');
-const password = env.match(/^ADMIN_PASSWORD=(.+)$/m)?.[1];
+const password =
+  process.env.ADMIN_PASSWORD || env.match(/^ADMIN_PASSWORD=(.+)$/m)?.[1];
 let hostCookie = '',
   guestCookie = '';
 let checks = 0;

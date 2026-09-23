@@ -1,4 +1,4 @@
-import { database } from '@/db';
+import { createEvent, updateEvent } from '@/db';
 import { parseEvent } from '@/lib/validation';
 import {
   body,
@@ -13,18 +13,7 @@ export async function POST(request: Request) {
     checkOrigin(request);
     await requireAdmin(request);
     const event = parseEvent(await body(request));
-    const db = await database();
-    const result = await db
-      .prepare(
-        'INSERT OR IGNORE INTO events (slug,data,created_at) VALUES (?,?,?)',
-      )
-      .bind(event.slug, JSON.stringify(event), new Date().toISOString())
-      .run();
-    if (!result.meta.changes)
-      throw new HttpError(
-        'That invitation link is already in use. Please choose another.',
-        409,
-      );
+    await createEvent(event);
     return json({ event }, 201);
   });
 }
@@ -33,12 +22,8 @@ export async function PUT(request: Request) {
     checkOrigin(request);
     await requireAdmin(request);
     const event = parseEvent(await body(request));
-    const db = await database();
-    const result = await db
-      .prepare('UPDATE events SET data=? WHERE slug=?')
-      .bind(JSON.stringify(event), event.slug)
-      .run();
-    if (!result.meta.changes) throw new HttpError('Invitation not found.', 404);
+    if (!(await updateEvent(event)))
+      throw new HttpError('Invitation not found.', 404);
     return json({ event });
   });
 }
