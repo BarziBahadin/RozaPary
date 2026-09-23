@@ -46,6 +46,7 @@ export function InvitationExperience({ event }: { event: Invitation }) {
   const cover = useRef<HTMLElement>(null);
   const opening = useRef(false);
   const tracked = useRef(false);
+  const hasStartedMusic = useRef(false);
   const audio = useInvitationAudio();
   useEffect(
     () => () => {
@@ -71,6 +72,11 @@ export function InvitationExperience({ event }: { event: Invitation }) {
       '(prefers-reduced-motion: reduce)',
     ).matches;
     setPhase('opening');
+    // Use the opening gesture to unlock audio; replay preserves the guest’s sound choice.
+    if (!hasStartedMusic.current) {
+      hasStartedMusic.current = true;
+      void audio.toggle();
+    }
     void audio.rustle(reducedMotion ? 0 : 0.48);
     if (!tracked.current) {
       tracked.current = true;

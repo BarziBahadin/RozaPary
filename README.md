@@ -23,7 +23,7 @@ The local D1 database persists in `.wrangler/`. The demo event is inserted only 
 
 - Mouse, keyboard, and touch can break the gold wax seal. The flap opens, the paper lifts, and the full invitation takes over the screen.
 - Reduced-motion preferences skip long transitions and ambient effects. The opened invitation receives focus.
-- A soft procedural paper rustle plays after the open gesture. Original Web Audio arpeggios play only after the guest opts in with the sound button; pausing and backgrounding the tab stop playback. No external music licensing or audio downloads are required.
+- A soft procedural paper rustle plays after the open gesture. Original Web Audio arpeggios start automatically on the first envelope-opening gesture (so browsers can permit playback); guests can pause them with the sound button. Replaying the envelope preserves their sound choice; pausing and backgrounding the tab stop playback. No external music licensing or audio downloads are required.
 - Floating gold dust and CSS 3D butterflies complement the burgundy/ivory layout.
 - Event details include local time, an external Google Maps link, an RFC 5545 calendar download, a schedule, and dress code.
 - RSVP supports full name, attending/declining, 0–5 additional guests, dietary requirements, and a personal message. Guest input is validated on the server. Late replies are rejected using the event’s local date.
