@@ -78,7 +78,7 @@ export function useInvitationAudio() {
       stop();
     }
   }
-  async function rustle() {
+  async function rustle(delay = 0) {
     try {
       const ctx = await audioContext();
       const length = Math.floor(ctx.sampleRate * 0.55);
@@ -97,7 +97,7 @@ export function useInvitationAudio() {
       source.connect(filter);
       filter.connect(gain);
       gain.connect(ctx.destination);
-      source.start();
+      source.start(ctx.currentTime + delay);
       source.onended = () => {
         source.disconnect();
         filter.disconnect();

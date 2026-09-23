@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import {
   ArrowUpRight,
   VolumeX,
@@ -37,6 +37,9 @@ function Butterfly({ className }: { className: string }) {
 }
 export function InvitationExperience({ event }: { event: Invitation }) {
   const [phase, setPhase] = useState<'sealed' | 'opening' | 'open'>('sealed');
+  const [reveal, setReveal] = useState<CSSProperties | null>(null);
+  const paper = useRef<HTMLDivElement>(null);
+  const seal = useRef<HTMLButtonElement>(null);
   const [shareStatus, setShareStatus] = useState('');
   const [shareFallback, setShareFallback] = useState('');
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -50,43 +53,59 @@ export function InvitationExperience({ event }: { event: Invitation }) {
     },
     [],
   );
-  function openInvitation(target?: string) {
-    if (phase === 'open') {
-      if (target)
-        document.getElementById(target)?.scrollIntoView({ behavior: 'smooth' });
-      return;
-    }
-    if (opening.current) return;
+  function finishOpening() {
+    if (timer.current) clearTimeout(timer.current);
+    setPhase('open');
+    setReveal(null);
+    opening.current = false;
+    requestAnimationFrame(() => {
+      // Keep the viewport still; focus must not introduce a second scrolling animation.
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      cover.current?.focus({ preventScroll: true });
+    });
+  }
+  function openInvitation() {
+    if (opening.current || phase === 'open') return;
     opening.current = true;
+    const reducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches;
     setPhase('opening');
-    void audio.rustle();
+    void audio.rustle(reducedMotion ? 0 : 0.48);
     if (!tracked.current) {
       tracked.current = true;
       void fetch('/api/opens', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ eventSlug: event.slug }),
-      }).catch(() => {
-        tracked.current = false;
-      });
-    }
-    timer.current = setTimeout(
-      () => {
-        setPhase('open');
-        opening.current = false;
-        requestAnimationFrame(() => {
-          if (target)
-            document
-              .getElementById(target)
-              ?.scrollIntoView({ behavior: 'smooth' });
-          else {
-            cover.current?.scrollIntoView({ behavior: 'smooth' });
-            cover.current?.focus({ preventScroll: true });
-          }
+      })
+        .then((response) => {
+          if (!response.ok) tracked.current = false;
+        })
+        .catch(() => {
+          tracked.current = false;
         });
-      },
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 30 : 2200,
-    );
+    }
+    if (reducedMotion) {
+      finishOpening();
+      return;
+    }
+    // Seal (0–600ms), hinge (450–1450ms), paper lift (1200–2650ms).
+    timer.current = setTimeout(() => {
+      const bounds = paper.current?.getBoundingClientRect();
+      if (!bounds) {
+        finishOpening();
+        return;
+      }
+      setReveal({
+        '--paper-top': `${Math.max(0, bounds.top)}px`,
+        '--paper-right': `${Math.max(0, window.innerWidth - bounds.right)}px`,
+        '--paper-bottom': `${Math.max(0, window.innerHeight - bounds.bottom)}px`,
+        '--paper-left': `${Math.max(0, bounds.left)}px`,
+      } as CSSProperties);
+      // Animation-end is the normal handoff. The timer also covers interrupted animations.
+      timer.current = setTimeout(finishOpening, 1200);
+    }, 2700);
   }
   async function share() {
     const url = `${window.location.origin}/i/${event.slug}`;
@@ -108,7 +127,20 @@ export function InvitationExperience({ event }: { event: Invitation }) {
     }
   }
   return (
-    <main className={`invitation-shell phase-${phase}`}>
+    <main
+      className={`invitation-shell phase-${phase}`}
+      aria-busy={phase === 'opening'}
+    >
+      {reveal && (
+        <div
+          className="paper-reveal"
+          style={reveal}
+          aria-hidden="true"
+          onAnimationEnd={(event) => {
+            if (event.target === event.currentTarget) finishOpening();
+          }}
+        />
+      )}
       {phase === 'open' && (
         <>
           <a className="skip-link" href="#celebration">
@@ -129,15 +161,7 @@ export function InvitationExperience({ event }: { event: Invitation }) {
                 The invitation
               </a>
               <a href="#celebration">The celebration</a>
-              <a
-                href="#rsvp"
-                onClick={(e) => {
-                  if (phase !== 'open') {
-                    e.preventDefault();
-                    openInvitation('rsvp');
-                  }
-                }}
-              >
+              <a href="#rsvp">
                 Kindly RSVP <ArrowUpRight size={13} />
               </a>
             </nav>
@@ -189,7 +213,7 @@ export function InvitationExperience({ event }: { event: Invitation }) {
             </p>
             <div className={`envelope ${phase === 'opening' ? 'is-open' : ''}`}>
               <div className="envelope-back" />
-              <div className="insert-card">
+              <div className="insert-card" ref={paper} aria-hidden="true">
                 <span className="card-small">YOU ARE WARMLY INVITED</span>
                 <span className="card-monogram">{event.initials}</span>
                 <span className="card-small">{prettyDate(event.date)}</span>
@@ -200,8 +224,12 @@ export function InvitationExperience({ event }: { event: Invitation }) {
                   a celebration of love
                 </span>
               </div>
-              <div className="envelope-flap" />
+              <div className="envelope-flap" aria-hidden="true">
+                <span className="flap-face flap-outside" />
+                <span className="flap-face flap-inside" />
+              </div>
               <button
+                ref={seal}
                 className="wax-seal"
                 aria-label="Break the seal and open your invitation"
                 disabled={phase === 'opening'}
@@ -268,7 +296,11 @@ export function InvitationExperience({ event }: { event: Invitation }) {
               onClick={() => {
                 setPhase('sealed');
                 opening.current = false;
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setReveal(null);
+                window.scrollTo({ top: 0, behavior: 'instant' });
+                requestAnimationFrame(() =>
+                  seal.current?.focus({ preventScroll: true }),
+                );
               }}
             >
               <RotateCcw size={12} />
