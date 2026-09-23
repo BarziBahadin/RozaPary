@@ -101,3 +101,4 @@ A new Sites deployment is private to the owner. Guest links become usable by out
 - `tests/` — domain tests and local API integration tests
 
 The generated `public/og.png` is original invitation artwork. Typography loads from Google Fonts with serif/sans fallbacks. CSS and synthesized audio keep the core interaction lightweight; no WebGL is required.
+# RozaPary
