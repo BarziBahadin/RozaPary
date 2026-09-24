@@ -100,7 +100,7 @@ export function InvitationExperience({ event }: { event: Invitation }) {
       finishOpening();
       return;
     }
-    // Seal (0–600ms), hinge (450–1450ms), paper lift (1200–2650ms).
+    // Seal, hinge, and paper lift are intentionally slow and ceremonial.
     timer.current = setTimeout(() => {
       const bounds = paper.current?.getBoundingClientRect();
       if (!bounds) {
@@ -114,8 +114,8 @@ export function InvitationExperience({ event }: { event: Invitation }) {
         '--paper-left': `${Math.max(0, bounds.left)}px`,
       } as CSSProperties);
       // Animation-end is the normal handoff. The timer also covers interrupted animations.
-      timer.current = setTimeout(finishOpening, 1200);
-    }, 2700);
+      timer.current = setTimeout(finishOpening, 1400);
+    }, 3950);
   }
   async function share() {
     const url = `${window.location.origin}/i/${event.slug}`;
@@ -229,10 +229,13 @@ export function InvitationExperience({ event }: { event: Invitation }) {
                 <span className="card-small">{prettyDate(event.date)}</span>
               </div>
               <div className="envelope-front">
+                <span className="envelope-floral envelope-floral-left" />
+                <span className="envelope-floral envelope-floral-right" />
                 <span className="envelope-emboss">{event.initials}</span>
                 <span className="envelope-inscription">open with love</span>
               </div>
               <div className="envelope-flap" aria-hidden="true">
+                <span className="flap-floral" />
                 <span className="flap-face flap-outside" />
                 <span className="flap-face flap-inside" />
               </div>
@@ -275,16 +278,11 @@ export function InvitationExperience({ event }: { event: Invitation }) {
         >
           <div className="cover-border">
             <p className="eyebrow">WE'RE GETTING ENGAGED</p>
-            <p className="cover-kind">YOU'RE</p>
             <span className="cover-ampersand">&amp;</span>
             <h1>
               <span>{firstName || event.names}</span>
               <span>{secondName || ''}</span>
             </h1>
-            <p className="cover-message">
-              cordially
-              <span>INVITED</span>
-            </p>
             <div className="cover-date">
               <span>{prettyDate(event.date, { weekday: 'long' })}</span>
               <strong>
