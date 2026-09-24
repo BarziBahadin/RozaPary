@@ -16,35 +16,35 @@ export type Invitation = {
   schedule: ScheduleItem[];
 };
 export const demoEvent: Invitation = {
-  slug: 'adele-and-oliver',
-  names: 'Adele & Oliver',
-  initials: 'A & O',
-  kind: 'Wedding celebration',
+  slug: 'roza-and-soran',
+  names: 'Roza & Soran',
+  initials: 'R & S',
+  kind: 'Engagement celebration',
   date: '2027-06-19',
   time: '16:00',
-  timezone: 'Europe/Rome',
-  venue: 'Villa Balbiano',
-  location: 'Lake Como, Italy',
-  address: 'Via Regina, 2, 22010 Ossuccio CO, Italy',
+  timezone: 'Asia/Baghdad',
+  venue: 'The Garden Hall',
+  location: 'Erbil, Kurdistan',
+  address: 'Erbil, Kurdistan',
   replyBy: '2027-05-19',
-  dressCode: 'Black tie · A touch of romance',
+  dressCode: 'Soft formal · Burgundy, cream, or warm neutrals',
   message:
-    'With full hearts and our favorite people, we begin our forever. We would be so delighted to have you by our side.',
+    'With full hearts and our favorite people, we begin our forever. We would be honored to have you by our side.',
   schedule: [
     {
       time: '4:00 PM',
-      title: 'The ceremony',
-      description: 'A promise of forever, overlooking the lake.',
+      title: 'Guest arrival',
+      description: 'A warm welcome as the evening softly begins.',
     },
     {
       time: '5:00 PM',
-      title: 'A little aperitivo',
-      description: 'Raise a glass in the gardens as the sun softens.',
+      title: 'The engagement',
+      description: 'A promise, a ring, and a room full of love.',
     },
     {
       time: '7:00 PM',
       title: 'Dinner & dancing',
-      description: 'An evening of candlelight, good company, and celebration.',
+      description: 'Candlelight, music, and a beautiful celebration.',
     },
   ],
 };

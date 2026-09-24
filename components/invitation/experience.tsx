@@ -6,7 +6,6 @@ import {
   VolumeX,
   Volume2,
   Flower2,
-  Sparkles,
   MapPin,
   CalendarDays,
   Clock3,
@@ -17,25 +16,30 @@ import { Button } from '@/components/ui/button';
 import { type Invitation, prettyDate } from '@/lib/event';
 import { RsvpForm } from './rsvp-form';
 import { useInvitationAudio } from './audio';
-function Butterfly({ className }: { className: string }) {
+function BotanicalSprig({ className }: { className: string }) {
   return (
     <svg
-      className={`butterfly ${className}`}
-      viewBox="0 0 60 50"
-      fill="currentColor"
+      className={`botanical-sprig ${className}`}
+      viewBox="0 0 170 230"
+      fill="none"
       aria-hidden="true"
     >
-      <g className="left-wing">
-        <path d="M29 24C20-7-7 3 7 23c-17 15 10 31 22 3Z" />
-      </g>
-      <g className="right-wing">
-        <path d="M31 24C40-7 67 3 53 23c17 15-10 31-22 3Z" />
-      </g>
-      <path d="M29 15h2v25h-2z" />
+      <path
+        className="sprig-stem"
+        d="M112 218C82 174 69 130 77 86c5-29 19-53 40-72"
+      />
+      <path d="M82 132C52 122 34 103 28 77c27 2 47 18 58 47" />
+      <path d="M91 102C65 85 54 63 59 36c27 10 42 30 39 61" />
+      <path d="M104 75c1-28 12-49 34-63 8 27 0 50-25 69" />
+      <path d="M95 161c-25 1-45-9-60-30 25-8 47-1 66 22" />
+      <path d="M108 187c-19 11-39 11-59 1 17-17 36-21 58-8" />
     </svg>
   );
 }
 export function InvitationExperience({ event }: { event: Invitation }) {
+  const [firstName, secondName] = event.names
+    .split(/\s*&\s*|\s+and\s+/i)
+    .map((name) => name.trim());
   const [phase, setPhase] = useState<'sealed' | 'opening' | 'open'>('sealed');
   const [reveal, setReveal] = useState<CSSProperties | null>(null);
   const paper = useRef<HTMLDivElement>(null);
@@ -215,20 +219,18 @@ export function InvitationExperience({ event }: { event: Invitation }) {
           <div className="envelope-stage">
             <div className="stage-orbit" />
             <p className="envelope-dedication">
-              A little something, just for you
+              A sealed invitation, made softly for you
             </p>
             <div className={`envelope ${phase === 'opening' ? 'is-open' : ''}`}>
               <div className="envelope-back" />
               <div className="insert-card" ref={paper} aria-hidden="true">
-                <span className="card-small">YOU ARE WARMLY INVITED</span>
+                <span className="card-small">WE'RE GETTING ENGAGED</span>
                 <span className="card-monogram">{event.initials}</span>
                 <span className="card-small">{prettyDate(event.date)}</span>
               </div>
               <div className="envelope-front">
                 <span className="envelope-emboss">{event.initials}</span>
-                <span className="envelope-inscription">
-                  a celebration of love
-                </span>
+                <span className="envelope-inscription">open with love</span>
               </div>
               <div className="envelope-flap" aria-hidden="true">
                 <span className="flap-face flap-outside" />
@@ -250,23 +252,17 @@ export function InvitationExperience({ event }: { event: Invitation }) {
               onClick={() => openInvitation()}
             >
               {phase === 'opening'
-                ? 'A little magic is unfolding…'
+                ? 'The envelope is opening...'
                 : 'Open your invitation'}{' '}
               <ArrowUpRight size={15} />
             </Button>
             <p className="tap-hint" aria-live="polite">
               {phase === 'opening'
                 ? 'OUR FOREVER BEGINS WITH YOU.'
-                : 'BREAK THE SEAL. LET THE MAGIC BEGIN.'}
+                : 'BREAK THE SEAL. LET THE EVENING BEGIN.'}
             </p>
-            <div className="stage-sparkle sparkle-one">
-              <Sparkles />
-            </div>
-            <div className="stage-sparkle sparkle-two">
-              <Sparkles size={16} />
-            </div>
-            <Butterfly className="butterfly-one" />
-            <Butterfly className="butterfly-two" />
+            <BotanicalSprig className="sprig-one" />
+            <BotanicalSprig className="sprig-two" />
           </div>
         </section>
       ) : (
@@ -278,11 +274,17 @@ export function InvitationExperience({ event }: { event: Invitation }) {
           aria-label="Your invitation"
         >
           <div className="cover-border">
-            <p className="eyebrow">YOU ARE JOYFULLY INVITED TO THE</p>
-            <p className="cover-kind">{event.kind}</p>
-            <span className="cover-monogram">{event.initials}</span>
-            <h1>{event.names}</h1>
-            <p className="cover-message">{event.message}</p>
+            <p className="eyebrow">WE'RE GETTING ENGAGED</p>
+            <p className="cover-kind">YOU'RE</p>
+            <span className="cover-ampersand">&amp;</span>
+            <h1>
+              <span>{firstName || event.names}</span>
+              <span>{secondName || ''}</span>
+            </h1>
+            <p className="cover-message">
+              cordially
+              <span>INVITED</span>
+            </p>
             <div className="cover-date">
               <span>{prettyDate(event.date, { weekday: 'long' })}</span>
               <strong>
@@ -310,11 +312,11 @@ export function InvitationExperience({ event }: { event: Invitation }) {
               }}
             >
               <RotateCcw size={12} />
-              Replay the little magic
+              Replay the opening
             </Button>
           </div>
-          <Butterfly className="butterfly-one" />
-          <Butterfly className="butterfly-two" />
+          <BotanicalSprig className="sprig-one" />
+          <BotanicalSprig className="sprig-two" />
         </section>
       )}
       {phase === 'open' && (
